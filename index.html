@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I'm Sorry ❤️</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffebee;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #d32f2f;
+            touch-action: manipulation; /* Better touch control */
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        button {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 15px 30px; /* Bigger for mobile */
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+            -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+        }
+        #noBtn {
+            position: relative; /* Changed from absolute */
+            transition: all 0.4s ease-out; /* Smoother movement */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>I'm So Sorry 😔❤️</h1>
+        <p>I messed up, and I regret it. You mean everything to me.</p>
+        
+        <button id="apologyBtn">Reveal My Promise</button>
+        
+        <div id="hiddenMessage" class="hidden">
+            <h2>I Promise to Do Better</h2>
+            <p>I love you more than words can say.</p>
+            <button id="forgiveBtn">Will You Forgive Me?</button>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-optimized event listeners
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Forgiving "No" button (works infinitely on mobile)
+        function setupNoButton(noBtn) {
+            const escape = () => {
+                const maxX = window.innerWidth - 100;
+                const maxY = window.innerHeight - 100;
+                
+                // Random position avoiding edges
+                noBtn.style.left = Math.max(10, Math.random() * maxX) + 'px';
+                noBtn.style.top = Math.max(10, Math.random() * maxY) + 'px';
+                
+                // Rotate for playful effect
+                noBtn.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+            };
+
+            // Mobile: Escape on touchstart
+            if (isMobile()) {
+                noBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    escape();
+                }, { passive: false });
+            }
+            // Desktop: Escape on mouseover
+            else {
+                noBtn.addEventListener('mouseover', escape);
+            }
+        }
+
+        // Initialize
+        document.getElementById("apologyBtn").addEventListener("click", function() {
+            document.getElementById("hiddenMessage").classList.remove("hidden");
+            this.textContent = "I Love You!";
+            
+            // Create forgiveness popup
+            const popup = document.createElement("div");
+            popup.innerHTML = `
+                <div style="position:fixed; top:0; left:0; width:100%; height:100%; 
+                            background:rgba(0,0,0,0.7); display:flex; justify-content:center; 
+                            align-items:center; z-index:1000;">
+                    <div style="background:white; padding:30px; border-radius:15px; text-align:center;">
+                        <h2 style="color:#d32f2f;">Forgive Me? 😔❤️</h2>
+                        <div style="display:flex; justify-content:center; gap:15px; margin-top:20px;">
+                            <button id="yesBtn" style="background:#4CAF50; padding:15px 30px;">Yes</button>
+                            <button id="noBtn" style="background:#d32f2f; padding:15px 30px;">No</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+            
+            // Setup buttons
+            document.getElementById("yesBtn").addEventListener("click", () => {
+                createConfetti();
+                popup.remove();
+            });
+            
+            setupNoButton(document.getElementById("noBtn"));
+        });
+
+        // Confetti function (unchanged)
+        function createConfetti() {
+            // ... (use same confetti code as before)
+        }
+    </script>
+</body>
+</html>
