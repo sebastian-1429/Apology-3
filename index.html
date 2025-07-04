@@ -14,9 +14,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             color: #d32f2f;
-            touch-action: manipulation; /* Better touch control */
+            touch-action: manipulation;
+            overflow: hidden;
         }
         .container {
             background: white;
@@ -25,106 +26,213 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             max-width: 500px;
             width: 90%;
+            margin: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
         }
         button {
             background: #d32f2f;
             color: white;
             border: none;
-            padding: 15px 30px; /* Bigger for mobile */
+            padding: 15px 30px;
             font-size: 18px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             margin: 10px;
-            -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:hover {
+            background: #b71c1c;
+            transform: scale(1.05);
+        }
+        .hidden {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .visible {
+            display: block;
+            opacity: 1;
+        }
+        #heart {
+            font-size: 60px;
+            margin: 20px 0;
+            animation: pulse 1.5s infinite;
+            cursor: pointer;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
         }
         #noBtn {
-            position: relative; /* Changed from absolute */
-            transition: all 0.4s ease-out; /* Smoother movement */
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>I'm So Sorry 😔❤️</h1>
-        <p>I messed up, and I regret it. You mean everything to me.</p>
+        <p>I messed up, and I regret it. You mean the world to me.</p>
+        
+        <div id="heart">❤️</div>
         
         <button id="apologyBtn">Reveal My Promise</button>
         
         <div id="hiddenMessage" class="hidden">
             <h2>I Promise to Do Better</h2>
             <p>I love you more than words can say.</p>
-            <button id="forgiveBtn">Will You Forgive Me?</button>
         </div>
     </div>
 
     <script>
-        // Mobile-optimized event listeners
+        // Mobile detection
         function isMobile() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
 
-        // Forgiving "No" button (works infinitely on mobile)
-        function setupNoButton(noBtn) {
-            const escape = () => {
-                const maxX = window.innerWidth - 100;
-                const maxY = window.innerHeight - 100;
+        // Confetti function
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#ff9900'];
+            const confettiCount = isMobile() ? 150 : 300; // Fewer on mobile for performance
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = -10 + 'px';
+                confetti.style.width = (5 + Math.random() * 10) + 'px';
+                confetti.style.height = (5 + Math.random() * 10) + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
                 
-                // Random position avoiding edges
-                noBtn.style.left = Math.max(10, Math.random() * maxX) + 'px';
-                noBtn.style.top = Math.max(10, Math.random() * maxY) + 'px';
+                document.body.appendChild(confetti);
                 
-                // Rotate for playful effect
-                noBtn.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
-            };
-
-            // Mobile: Escape on touchstart
-            if (isMobile()) {
-                noBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    escape();
-                }, { passive: false });
-            }
-            // Desktop: Escape on mouseover
-            else {
-                noBtn.addEventListener('mouseover', escape);
+                const animation = confetti.animate([
+                    { top: -10 + 'px', opacity: 1, transform: `rotate(${Math.random() * 360}deg)` },
+                    { top: 100 + 'vh', opacity: 0, transform: `rotate(${Math.random() * 360}deg)` }
+                ], {
+                    duration: 3000 + Math.random() * 3000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
             }
         }
 
         // Initialize
-        document.getElementById("apologyBtn").addEventListener("click", function() {
-            document.getElementById("hiddenMessage").classList.remove("hidden");
-            this.textContent = "I Love You!";
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById("apologyBtn");
+            const hiddenMsg = document.getElementById("hiddenMessage");
+            const heart = document.getElementById("heart");
             
-            // Create forgiveness popup
+            // Clickable heart
+            heart.addEventListener("click", function() {
+                this.style.transform = "scale(1.3)";
+                setTimeout(() => this.style.transform = "scale(1)", 300);
+            });
+
+            // Apology reveal
+            btn.addEventListener("click", function() {
+                hiddenMsg.classList.add("visible");
+                btn.textContent = "I Love You!";
+                heart.style.animation = "none";
+                
+                // Create forgiveness popup after delay
+                setTimeout(createForgivenessPopup, 1000);
+            });
+        });
+
+        // Forgiveness popup with mobile-optimized "No" button
+        function createForgivenessPopup() {
             const popup = document.createElement("div");
             popup.innerHTML = `
                 <div style="position:fixed; top:0; left:0; width:100%; height:100%; 
                             background:rgba(0,0,0,0.7); display:flex; justify-content:center; 
                             align-items:center; z-index:1000;">
-                    <div style="background:white; padding:30px; border-radius:15px; text-align:center;">
-                        <h2 style="color:#d32f2f;">Forgive Me? 😔❤️</h2>
-                        <div style="display:flex; justify-content:center; gap:15px; margin-top:20px;">
-                            <button id="yesBtn" style="background:#4CAF50; padding:15px 30px;">Yes</button>
-                            <button id="noBtn" style="background:#d32f2f; padding:15px 30px;">No</button>
+                    <div style="background:white; padding:30px; border-radius:15px; text-align:center; max-width:90%;">
+                        <h2 style="color:#d32f2f;">Will you forgive me? 😔❤️</h2>
+                        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px; margin-top:20px;">
+                            <button id="yesBtn" style="background:#4CAF50; min-width:120px;">Yes</button>
+                            <button id="noBtn" style="background:#d32f2f; min-width:120px;">No</button>
                         </div>
                     </div>
                 </div>
             `;
             document.body.appendChild(popup);
             
-            // Setup buttons
-            document.getElementById("yesBtn").addEventListener("click", () => {
+            // Yes button - confetti + close
+            document.getElementById("yesBtn").addEventListener("click", function() {
                 createConfetti();
-                popup.remove();
+                popup.innerHTML = `
+                    <div style="background:white; padding:30px; border-radius:15px; text-align:center;">
+                        <h2 style="color:#4CAF50;">Thank you! ❤️</h2>
+                        <p>You've made me so happy!</p>
+                    </div>
+                `;
+                setTimeout(() => popup.remove(), 3000);
             });
             
-            setupNoButton(document.getElementById("noBtn"));
-        });
-
-        // Confetti function (unchanged)
-        function createConfetti() {
-            // ... (use same confetti code as before)
+            // No button - escape logic
+            const noBtn = document.getElementById("noBtn");
+            let escapeCount = 0;
+            
+            const escapeButton = () => {
+                escapeCount++;
+                const btnWidth = noBtn.offsetWidth;
+                const btnHeight = noBtn.offsetHeight;
+                
+                // Calculate safe area (avoid edges)
+                const maxX = window.innerWidth - btnWidth - 20;
+                const maxY = window.innerHeight - btnHeight - 20;
+                
+                // New position (at least 50px from edges)
+                const newX = Math.max(50, Math.random() * maxX);
+                const newY = Math.max(50, Math.random() * maxY);
+                
+                // Apply movement with smooth transition
+                noBtn.style.position = "absolute";
+                noBtn.style.left = newX + "px";
+                noBtn.style.top = newY + "px";
+                noBtn.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+                
+                // Make it harder after 3 escapes
+                if (escapeCount > 3) {
+                    noBtn.style.transitionDuration = "0.2s";
+                }
+            };
+            
+            // Mobile events
+            if (isMobile()) {
+                noBtn.addEventListener("touchstart", function(e) {
+                    e.preventDefault();
+                    escapeButton();
+                }, { passive: false });
+            } 
+            // Desktop events
+            else {
+                noBtn.addEventListener("mouseover", escapeButton);
+            }
         }
     </script>
 </body>
